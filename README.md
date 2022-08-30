@@ -20,7 +20,8 @@ docker-compose.yml основан на оригинальном Nightscout, но
 
 Всё, что Вам осталось, это запустить в крнсоли Вашего VPS скрипт SSH указанный ниже.
 
-'bash <(wget -qO- https://raw.githubusercontent.com/mo211073bkp/Ubuntu-Docker/main/install.sh)'
-
+`bash <(wget -qO- https://raw.githubusercontent.com/mo211073bkp/Ubuntu-Docker/main/install.sh)`
 
 Enjoy your private nightscout installation
+
+После установки всего Вам нужно перейти в перенаправление портов и перенаправить порт 80/443 на 1337 
