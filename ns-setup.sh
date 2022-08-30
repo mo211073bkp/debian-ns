@@ -32,6 +32,7 @@ echo -e $YELLOW ждите, все работает, не зависло... $NOR
 cd /opt 
 mkdir nightscout
 cd nightscout
+mkdir cgm-remote-monitor
 git clone https://github.com/nightscout/cgm-remote-monitor.git -b dev &> /dev/null
 cd cgm-remote-monitor
 npm install --unsafe-perm &> /dev/null
