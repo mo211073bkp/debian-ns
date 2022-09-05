@@ -1,5 +1,5 @@
 #!/bin/bash
-get update
+apt-get update
 apt-get install -y ca-certificates
 
 GREEN='\033[0;32m'
