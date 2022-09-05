@@ -57,17 +57,18 @@ echo -n > /opt/nightscout/cgm-remote-monitor/start.sh
 
 echo -e $GREEN Создаем файл начальной конфигурации nightscout $NORMAL
 echo "#!/bin/bash
-export DISPLAY_UNITS="mmol"
 export MONGO_CONNECTION="mongodb://$MONGO_DB_USER:$MONGO_DB_USER_PASS@localhost:27017/$MONGO_DB_NAME"
 export PORT=1337
+##
+export DISPLAY_UNITS="mmol"
 export API_SECRET="$MONGO_API_SECRET"
-export PUMP_FIELDS="reservoir battery status"
+export PUMP_FIELDS="reservoir battery clock status"
 export DEVICESTATUS_ADVANCED=true
-export ENABLE="careportal basal cage sage boluscalc rawbg iob bwp bage mmconnect bridge openaps pump iob maker"
+export ENABLE="careportal boluscalc food bwp cage sage iage iob cob basal ar2 rawbg pushover bgi pump openaps alice"
 export TIME_FORMAT=24
 export BASE_URL="$BASE_URL_USER"
 export INSECURE_USE_HTTP=true
-
+##
 export ALARM_HIGH=off
 export ALARM_LOW=off
 export ALARM_TIMEAGO_URGENT=off
@@ -77,7 +78,7 @@ export ALARM_TIMEAGO_WARN_MINS=15
 export ALARM_TYPES=simple
 export ALARM_URGENT_HIGH=off
 export ALARM_URGENT_LOW=off
-export AUTH_DEFAULT_ROLES=denied
+export AUTH_DEFAULT_ROLES=readable
 export BG_HIGH=10
 export BG_LOW=4
 export BG_TARGET_BOTTOM=4
@@ -89,22 +90,22 @@ export BRIDGE_USER_NAME=
 export CUSTOM_TITLE=Nightscout
 export DISABLE=
 export MONGO_COLLECTION=entries
-export NIGHT_MODE=on
+export NIGHT_MODE=off
 export OPENAPS_ENABLE_ALERTS=true
 export OPENAPS_FIELDS='status-symbol status-label iob meal-assist rssi'
 export OPENAPS_RETRO_FIELDS='status-symbol status-label iob meal-assist rssi'
 export OPENAPS_URGENT=60
 export OPENAPS_WARN=20
 #export PAPERTRAIL_API_TOKEN=some_token
-export PUMP_ENABLE_ALERTS=true
+export PUMP_ENABLE_ALERTS=false
 export PUMP_FIELDS='battery reservoir clock status'
 export PUMP_RETRO_FIELDS='battery reservoir clock status'
 export PUMP_URGENT_BATT_V=1.3
 export PUMP_URGENT_CLOCK=30
 export PUMP_URGENT_RES=10
-export PUSHOVER=
+#export PUSHOVER=
 export SHOW_FORECAST=openaps
-export SHOW_PLUGINS='openaps pump iob sage cage careportal'
+export SHOW_PLUGINS='careportal rawbg iob maker bridge cob bwp cage basal treatmentnotify basal visualization on the graph pushover temp basal visualization exercise entry visualization new scaling options reports admin tools minimed connect and nightscout'
 export SHOW_RAWBG=noise
 export THEME=colors
 export LANGUAGE=ru
