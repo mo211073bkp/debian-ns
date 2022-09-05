@@ -6,6 +6,24 @@ GREEN='\033[0;32m'
 NORMAL='\033[0m'
 YELLOW='\033[0;33m'
 
+function eDataFunction {
+
+  read -p "$( echo -e $YELLOW Имя пользователя базы данных MONGO: $NORMAL)"  MONGO_DB_USER
+  read -e -p "$( echo -e $YELLOW Пароль пользователя базы данных MONGO: $NORMAL)" -i "$(openssl rand -base64 12)" MONGO_DB_USER_PASS
+  read -e -p "$( echo -e $YELLOW Название базы данных MONGO \( Nightscout \): $NORMAL)" -i "Nightscout" MONGO_DB_NAME
+  read -e -p "$( echo -e $YELLOW API_SECRET - пароль для работы Nightscout, минимум 12 символов!: $NORMAL)" -i "$(openssl rand -base64 12)" MONGO_API_SECRET
+  read -p "$( echo -e $YELLOW Доменное имя, по которому будет доступен Nightscout: $NORMAL)" BASE_URL_USER
+
+
+        read -n1 -p "Проверьте еще раз введенные данные. Запишите их, сфотографируйте, сохраните. Если что-то неверно, откажитесь от продолжения.[Y/N]"$'\n' runCommand
+        echo -e "\n"  
+        case $runCommand in
+            y|Y) ;;
+            *) printf "\nПопробуем еще раз\n" && eDataFunction;;
+        esac
+}
+
+
 function checkIt()
 {
 systemctl -q is-active $1  && echo -e $1 $GREEN good $NORMAL || echo -e $1 $YELLOW fail $NORMAL
@@ -32,7 +50,6 @@ echo -e $YELLOW ждите, все работает, не зависло... $NOR
 cd /opt 
 mkdir nightscout
 cd nightscout
-mkdir cgm-remote-monitor
 git clone https://github.com/nightscout/cgm-remote-monitor.git -b dev &> /dev/null
 cd cgm-remote-monitor
 npm install --unsafe-perm &> /dev/null
@@ -46,29 +63,29 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
 echo -e "$GREEN ЗАПОЛНИТЕ ДАННЫЕ ДЛЯ ЭТОГО СЕРВЕРА. ЗАПИШИТЕ ИХ. $NORMAL" 
 
-read -p "$( echo -e $YELLOW Имя пользователя базы данных MONGO: $NORMAL)"  MONGO_DB_USER
-read -p "$( echo -e $YELLOW Пароль пользователя базы данных MONGO: $NORMAL)"  MONGO_DB_USER_PASS
-read -p "$( echo -e $YELLOW Название базы данных MONGO \( Nightscout \): $NORMAL)" MONGO_DB_NAME
-read -p "$( echo -e $YELLOW API_SECRET - пароль для работы Nightscout, минимум 12 символов!: $NORMAL)" MONGO_API_SECRET
-read -p "$( echo -e $YELLOW Доменное имя, по которому будет доступен Nightscout: $NORMAL)" BASE_URL_USER
+eDataFunction
+#read -p "$( echo -e $YELLOW Имя пользователя базы данных MONGO: $NORMAL)"  MONGO_DB_USER
+#read -p "$( echo -e $YELLOW Пароль пользователя базы данных MONGO: $NORMAL)"  MONGO_DB_USER_PASS
+#read -p "$( echo -e $YELLOW Название базы данных MONGO \( Nightscout \): $NORMAL)" MONGO_DB_NAME
+#read -p "$( echo -e $YELLOW API_SECRET - пароль для работы Nightscout, минимум 12 символов!: $NORMAL)" MONGO_API_SECRET
+#read -p "$( echo -e $YELLOW Доменное имя, по которому будет доступен Nightscout: $NORMAL)" BASE_URL_USER
 
 touch /opt/nightscout/cgm-remote-monitor/start.sh
 echo -n > /opt/nightscout/cgm-remote-monitor/start.sh
 
 echo -e $GREEN Создаем файл начальной конфигурации nightscout $NORMAL
 echo "#!/bin/bash
+export DISPLAY_UNITS="mmol"
 export MONGO_CONNECTION="mongodb://$MONGO_DB_USER:$MONGO_DB_USER_PASS@localhost:27017/$MONGO_DB_NAME"
 export PORT=1337
-##
-export DISPLAY_UNITS="mmol"
 export API_SECRET="$MONGO_API_SECRET"
-export PUMP_FIELDS="reservoir battery clock status"
+export PUMP_FIELDS="reservoir battery status"
 export DEVICESTATUS_ADVANCED=true
-export ENABLE="careportal boluscalc food bwp cage sage iage iob cob basal ar2 rawbg pushover bgi pump openaps alice"
+export ENABLE="careportal basal cage sage boluscalc rawbg iob bwp bage mmconnect bridge openaps pump iob maker"
 export TIME_FORMAT=24
 export BASE_URL="$BASE_URL_USER"
 export INSECURE_USE_HTTP=true
-##
+
 export ALARM_HIGH=off
 export ALARM_LOW=off
 export ALARM_TIMEAGO_URGENT=off
@@ -78,7 +95,7 @@ export ALARM_TIMEAGO_WARN_MINS=15
 export ALARM_TYPES=simple
 export ALARM_URGENT_HIGH=off
 export ALARM_URGENT_LOW=off
-export AUTH_DEFAULT_ROLES=readable
+export AUTH_DEFAULT_ROLES=denied
 export BG_HIGH=10
 export BG_LOW=4
 export BG_TARGET_BOTTOM=4
@@ -90,22 +107,22 @@ export BRIDGE_USER_NAME=
 export CUSTOM_TITLE=Nightscout
 export DISABLE=
 export MONGO_COLLECTION=entries
-export NIGHT_MODE=off
+export NIGHT_MODE=on
 export OPENAPS_ENABLE_ALERTS=true
 export OPENAPS_FIELDS='status-symbol status-label iob meal-assist rssi'
 export OPENAPS_RETRO_FIELDS='status-symbol status-label iob meal-assist rssi'
 export OPENAPS_URGENT=60
 export OPENAPS_WARN=20
 #export PAPERTRAIL_API_TOKEN=some_token
-export PUMP_ENABLE_ALERTS=false
+export PUMP_ENABLE_ALERTS=true
 export PUMP_FIELDS='battery reservoir clock status'
 export PUMP_RETRO_FIELDS='battery reservoir clock status'
 export PUMP_URGENT_BATT_V=1.3
 export PUMP_URGENT_CLOCK=30
 export PUMP_URGENT_RES=10
-#export PUSHOVER=
+export PUSHOVER=
 export SHOW_FORECAST=openaps
-export SHOW_PLUGINS='careportal rawbg iob maker bridge cob bwp cage basal treatmentnotify basal visualization on the graph pushover temp basal visualization exercise entry visualization new scaling options reports admin tools minimed connect and nightscout'
+export SHOW_PLUGINS='openaps pump iob sage cage careportal'
 export SHOW_RAWBG=noise
 export THEME=colors
 export LANGUAGE=ru
@@ -114,11 +131,11 @@ node server.js" >> /opt/nightscout/cgm-remote-monitor/start.sh
 
 sudo chmod +x start.sh
 
-echo -e Файл конфигурации nightscout - /opt/nightscout/cgm-remote-monitor/start.sh
-echo -e Строка подключения - mongodb://$MONGO_DB_USER:$MONGO_DB_USER_PASS@$BASE_URL_USER:27017/$MONGO_DB_NAME
+echo -e "#################################################################################################"
+echo -e "#>>>>>>> Файл конфигурации nightscout - /opt/nightscout/cgm-remote-monitor/start.sh   <<<<<<<<<<#"
+echo -e "#################################################################################################"
 
 echo -e $GREEN Создаем начальную конфигурацию базы MONGO $NORMAL
-
 
 mongo <<EOF 
     use $MONGO_DB_NAME
@@ -130,7 +147,7 @@ EOF
 
 MONGO_DB_ADMIN="NightscoutMongoAdmin"
 
-read -p "$( echo -e $YELLOWПароль администратора базы данных \(не пользователя\): $NORMAL)" MONGO_DB_ADMIN_PASS
+read -e -p "$( echo -e $YELLOWПароль администратора базы данных \(не пользователя\): $NORMAL)" -i "$(openssl rand -base64 12)" MONGO_DB_ADMIN_PASS
 mongo <<EOF 
     use admin
     db.createUser({user: "$MONGO_DB_ADMIN", pwd: "$MONGO_DB_ADMIN_PASS", roles:[{ role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]})
